@@ -1,6 +1,7 @@
 import os
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from moviepy.editor import VideoFileClip
+from moviepy.audio.fx.all import audio_fadein, audio_fadeout, volumex
 
 def crop_video(input_path, output_path, width, height):
     # Load the video clip
@@ -28,12 +29,17 @@ def crop_video(input_path, output_path, width, height):
     # Resize the cropped video to the desired resolution
     resized = cropped.resize((width, height))
 
-    # Save the cropped and resized video
+    # Adjust audio volume to 50%
+    resized = resized.volumex(0.5)
+
+    # Save the cropped, resized, and volume-adjusted video
     output_file = os.path.join(output_path, os.path.basename(input_path))
     resized.write_videofile(output_file)
 
     # Close the video clip
     video.close()
+
+# Rest of the code remains the same
 
 # Input and output directories
 input_directory = r'Y:\\New folder\\input'
@@ -44,7 +50,18 @@ width = 1080
 height = 1920
 
 # Process each .mp4 file in the input directory
+total_files = len([file_name for file_name in os.listdir(input_directory) if file_name.lower().endswith('.mp4')])
+processed_files = 0
+
 for file_name in os.listdir(input_directory):
-    if file_name.lower().endswith('.mp4'):
+    if file_name.lower().endswith('.mp4') and 'kills' in file_name.lower():
         input_path = os.path.join(input_directory, file_name)
         crop_video(input_path, output_directory, width, height)
+        processed_files += 1
+        print(f"Processed {processed_files}/{total_files} files")
+
+# Check if all files have been processed
+if processed_files == total_files:
+    print("All files have been converted.")
+else:
+    print("Conversion incomplete.")
